@@ -21,7 +21,9 @@ marketHolidays = [
     datetime.datetime(2020, 10, 2),
     datetime.datetime(2020, 11, 16),
     datetime.datetime(2020, 11, 30),
-    datetime.datetime(2020, 12, 25)
+    datetime.datetime(2020, 12, 25),
+    datetime.datetime(2021, 1, 26),
+    datetime.datetime(2021, 3, 11)
 ]
 
 marketWeekendOpen = [
@@ -441,8 +443,13 @@ class DataProcessor:
             options = options[options.SYMBOL==filter['symbol']]
         if '52weekLowThreshold' in filter:
             options = options[options['% above 52w low']<=filter['52weekLowThreshold']]
+        if 'ForDate' in filter:
+            options = options[options['ForDate']==filter['ForDate']]
         if 'sortBy' in filter:
-            options = options.sort_values(filter['sortBy'], ascending=False)
+            if 'sortAscending' in filter:
+              options = options.sort_values(filter['sortBy'], ascending=filter['sortAscending'])
+            else:
+              options = options.sort_values(filter['sortBy'], ascending=False)
         
         if 'returnFullset' in filter:
             return options
@@ -530,9 +537,9 @@ class DataProcessor:
         comparison['OiChangePer'] = comparison['OiChange'] / comparison['OPEN_INT*_y'] * 100
         comparison['OiChangePerAbs'] = abs(comparison['OiChangePer'])
         return comparison[['SYMBOL', 'STR_PRICE', 'EXP_DATE', 'OPT_TYPE', \
-            'CLOSE_PRICE_x', 'CLOSE_PRICE_y', 'OPEN_INT*_x', \
+            'CLOSE_PRICE_x', 'CLOSE_PRICE_y', 'OPEN_INT*_x', 'OPEN_INT*_y', \
             'Premium_x', 'Moneyness_x', \
-            'OiChangePer', 'OiChangePerAbs']]
+            'OiChange', 'OiChangePer', 'OiChangePerAbs']]
 
     def mergeEquityBhavAndDelivery(self, bhav, delivery):
         mergedData = pd.merge(delivery, bhav, how='inner', left_on=['SYMBOL', 'ForDate'], right_on=['SYMBOL', 'ForDate'])
